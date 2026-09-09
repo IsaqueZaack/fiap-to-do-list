@@ -1,4 +1,4 @@
-package IsaqueZaack.com.github.todolist.ui.theme
+package IsaqueZaack.com.github.todolist.ui.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
