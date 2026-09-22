@@ -48,6 +48,7 @@ fun ListaTarefasScreen(
     onEditarTarefa: (Int) -> Unit
 ) {
     val tarefas by viewModel.tarefas.collectAsStateWithLifecycle()
+    val tarefaParaExcluir by viewModel.tarefaParaExcluir.collectAsStateWithLifecycle()
 
     ListaTarefasContent(
         tarefas = tarefas,
@@ -56,7 +57,11 @@ fun ListaTarefasScreen(
         onCheckedChange = { tarefa, concluida ->
             viewModel.atualizar(tarefa.copy(concluida = concluida))
         },
-        onDeletar = { tarefa -> viewModel.deletar(tarefa) }
+        // O ícone de lixeira agora apenas abre o diálogo de confirmação
+        onDeletar = { tarefa -> viewModel.solicitarExclusao(tarefa) },
+        tarefaParaExcluir = tarefaParaExcluir,
+        onConfirmarExclusao = { viewModel.confirmarExclusao() },
+        onCancelarExclusao = { viewModel.cancelarExclusao() }
     )
 }
 
@@ -67,7 +72,10 @@ fun ListaTarefasContent(
     onNovaTarefa: () -> Unit,
     onEditarTarefa: (Int) -> Unit,
     onCheckedChange: (Tarefa, Boolean) -> Unit,
-    onDeletar: (Tarefa) -> Unit
+    onDeletar: (Tarefa) -> Unit,
+    tarefaParaExcluir: Tarefa? = null,
+    onConfirmarExclusao: () -> Unit = {},
+    onCancelarExclusao: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -106,6 +114,15 @@ fun ListaTarefasContent(
                 }
             }
         }
+    }
+
+    // Diálogo de confirmação exibido sobre a própria tela da lista
+    tarefaParaExcluir?.let { tarefa ->
+        ConfirmarExclusaoDialog(
+            tarefa = tarefa,
+            onConfirmar = onConfirmarExclusao,
+            onCancelar = onCancelarExclusao
+        )
     }
 }
 
@@ -173,6 +190,25 @@ private fun ListaTarefasContentPreview() {
         onEditarTarefa = {},
         onCheckedChange = { _, _ -> },
         onDeletar = {}
+    )
+}
+
+@Preview(showBackground = true, name = "Lista com confirmação de exclusão")
+@Composable
+private fun ListaTarefasContentConfirmacaoExclusaoPreview() {
+    val tarefas = listOf(
+        Tarefa(id = 1, titulo = "Estudar Room", descricao = "Revisar anotações e DAO", concluida = false),
+        Tarefa(id = 2, titulo = "Enviar atividade", descricao = "Upload no portal da FIAP", concluida = true)
+    )
+    ListaTarefasContent(
+        tarefas = tarefas,
+        onNovaTarefa = {},
+        onEditarTarefa = {},
+        onCheckedChange = { _, _ -> },
+        onDeletar = {},
+        tarefaParaExcluir = tarefas.first(),
+        onConfirmarExclusao = {},
+        onCancelarExclusao = {}
     )
 }
 
